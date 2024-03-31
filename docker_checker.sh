@@ -9,9 +9,17 @@ if [ $# -lt 1 ] || [ $1 == "-h" ] || [ $1 == "--help" ]; then
 	echo "-ai, --all-image				    Scan all installed docker image for vulnerabilities "
 	echo "-ac, --all-container	      			Scan  all containers for image vulnerabilities"
 	echo ""
-	echo "[OPTIONS :]"
+	echo "[OPTIONS]"
 	echo "-v, --verbose					      Detail of the output scan execution"
 	echo "-o, --output						Path output for each files result of the scan, if the directory doesn't exist, he is created"
+	echo "-f, --format 						Format
+												Available format :											
+    													table: 					A columnar summary (default).
+    													cyclonedx: 			 An XML report conforming to the CycloneDX 1.4 specification.
+    													cyclonedx-json: 	  A JSON report conforming to the CycloneDX 1.4 specification.
+    													json: 					Use this to get as much information out of Grype as possible!
+    													template: 			 Lets the user specify the output format. See Using templates below.
+"
 	echo ""
 	echo "Usage : ./docker_image_checker.sh [MODES] [OPTIONS]"
 	exit
@@ -21,6 +29,7 @@ fi
 MODE=""
 VERBOSE=false
 OUTPUT=""
+FORMAT="table"
 while (($#)); do
 	case $1 in
 		-ai|--all-image)
@@ -43,6 +52,10 @@ while (($#)); do
 			OUTPUT="$2"
 			shift 2
 			;;
+		-f|--format)
+			FORMAT="$2"
+			shift 2
+			;;
 		*)
 			echo "Unrecognized argument : $arg"
 			exit 1
@@ -60,20 +73,21 @@ vuln_scan() {
 	local IMAGES=$1
 	local VERBOSE=$2
 	local OUTPUT=$3
+	local FORMAT=$4
 	
 	if [ $VERBOSE == true  ]; then
 		if [ ! -z $OUTPUT ]; then
 			for IMAGE in $IMAGES; do
 				echo -e "\033[34m[$(date -u +"%Y-%m-%d %H:%M UTC")]\033[0m Quick Vulnerability Scan for \033[33m$IMAGE\033[0m"
 				TIME_START=$(date +%s)
-				grype $IMAGE | tee "$OUTPUT/$IMAGE.txt"
+				grype $IMAGE -o $FORMAT | tee "$OUTPUT/$(date -u +"%Y%m%d-%H:%M")_$IMAGE.$FORMAT"
 				echo ""
 			done
 		else
 			for IMAGE in $IMAGES; do	
 				echo -e "\033[34m[$(date -u +"%Y-%m-%d %H:%M UTC")]\033[0m Quick Vulnerability Scan for \033[33m$IMAGE\033[0m"
 				TIME_START=$(date +%s)
-				grype $IMAGE
+				grype $IMAGE -o $FORMAT
 				echo ""
 			done
 		fi
@@ -83,13 +97,13 @@ vuln_scan() {
 		if [ ! -z $OUTPUT ]; then
 			for IMAGE in $IMAGES; do
 				echo -e "\033[34mQuick Vulnerability Scan for \033[33m$IMAGE\033[0m"
-				grype $IMAGE | tee "$OUTPUT/$IMAGE.txt"
+				grype $IMAGE -o $FORMAT | tee "$OUTPUT/$(date -u +"%Y%m%d-%H:%M")_$IMAGE.$FORMAT"
 				echo ""
 			done
 		else
 			for IMAGE in $IMAGES; do
 				echo -e "\033[34mQuick Vulnerability Scan for \033[33m$IMAGE\033[0m"
-				grype $IMAGE
+				grype $IMAGE -o $FORMAT
 				echo ""
 			done
 		fi	
@@ -99,10 +113,10 @@ vuln_scan() {
 # Scan for all container image
 if [ $MODE == "--all-container" ]; then
 	IMAGES=$(sudo docker ps -a --format "{{.Image}}")
-	vuln_scan "$IMAGES" "$VERBOSE" "$OUTPUT"
+	vuln_scan "$IMAGES" "$VERBOSE" "$OUTPUT" "$FORMAT"
 
 # Scan for all installed docker image
 elif [ $MODE == "--all-image" ]; then
 	IMAGES=$(sudo docker images --format "{{.Repository}}:{{.Tag}}")
-	vuln_scan "$IMAGES" "$VERBOSE" "$OUTPUT"
+	vuln_scan "$IMAGES" "$VERBOSE" "$OUTPUT" "$FORMAT"
 fi
