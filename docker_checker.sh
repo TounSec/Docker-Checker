@@ -18,7 +18,6 @@ if [ $# -lt 1 ] || [ $1 == "-h" ] || [ $1 == "--help" ]; then
     													cyclonedx: 			 An XML report conforming to the CycloneDX 1.4 specification.
     													cyclonedx-json: 	  A JSON report conforming to the CycloneDX 1.4 specification.
     													json: 					Use this to get as much information out of Grype as possible!
-    													template: 			 Lets the user specify the output format. See Using templates below.
 "
 	echo ""
 	echo "Usage : ./docker_image_checker.sh [MODES] [OPTIONS]"
