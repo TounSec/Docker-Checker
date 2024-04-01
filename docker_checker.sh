@@ -12,7 +12,7 @@ if [ $# -lt 1 ] || [ $1 == "-h" ] || [ $1 == "--help" ]; then
 	echo "[OPTIONS]"
 	echo "-v, --verbose					      Detail of the output scan execution"
 	echo "-o, --output						Path output for each files result of the scan, if the directory doesn't exist, he is created"
-	echo "-f, --format 						Format
+	echo "-f, --format 						Format [Default : table]
 												Available format :											
     													table: 					A columnar summary (default).
     													cyclonedx: 			 An XML report conforming to the CycloneDX 1.4 specification.
@@ -20,7 +20,7 @@ if [ $# -lt 1 ] || [ $1 == "-h" ] || [ $1 == "--help" ]; then
     													json: 					Use this to get as much information out of Grype as possible!
 "
 	echo ""
-	echo "Usage : ./docker_image_checker.sh [MODES] [OPTIONS]"
+	echo -e "Usage : \033[36m$0 [MODES] [OPTIONS]\033[0m"
 	exit
 fi
 
@@ -44,8 +44,8 @@ while (($#)); do
 			shift
 			;;
 		-o|--output)
-			if [ -z $2 ] || [ ${2:0:1} == "-" ]; then
-				echo "Output path is missing or invalid after -o|--output option"
+			if [ -z $2 ]; then
+				echo "Output path is missing"
 				exit 1
 			fi
 			OUTPUT="$2"
@@ -56,15 +56,16 @@ while (($#)); do
 			shift 2
 			;;
 		*)
-			echo "Unrecognized argument : $arg"
+			echo "Unrecognized argument : $1"
 			exit 1
 			;;
 	esac
 done
 
-# Check if the output directory exist and create it if it doesn't
+# Check if the output directory exist and create it if it doesn't with root access permision
 if [ ! -z $OUTPUT ]; then
-	mkdir -p $OUTPUT
+	sudo mkdir -p $OUTPUT
+       	sudo chmod 700 $OUTPUT
 fi
 
 # Quick scan function for image vulnerabilities with GRYPE
@@ -79,7 +80,7 @@ vuln_scan() {
 			for IMAGE in $IMAGES; do
 				echo -e "\033[34m[$(date -u +"%Y-%m-%d %H:%M UTC")]\033[0m Quick Vulnerability Scan for \033[33m$IMAGE\033[0m"
 				TIME_START=$(date +%s)
-				grype $IMAGE -o $FORMAT | tee "$OUTPUT/$(date -u +"%Y%m%d-%H:%M")_$IMAGE.$FORMAT"
+				grype $IMAGE -o $FORMAT | sudo tee "$OUTPUT/$(date -u +"%Y%m%d-%H:%M")_$IMAGE.$FORMAT"
 				echo ""
 			done
 		else
@@ -96,7 +97,7 @@ vuln_scan() {
 		if [ ! -z $OUTPUT ]; then
 			for IMAGE in $IMAGES; do
 				echo -e "\033[34mQuick Vulnerability Scan for \033[33m$IMAGE\033[0m"
-				grype $IMAGE -o $FORMAT | tee "$OUTPUT/$(date -u +"%Y%m%d-%H:%M")_$IMAGE.$FORMAT"
+				grype $IMAGE -o $FORMAT | sudo tee "$OUTPUT/$(date -u +"%Y%m%d-%H:%M")_$IMAGE.$FORMAT"
 				echo ""
 			done
 		else
