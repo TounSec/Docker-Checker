@@ -58,5 +58,5 @@ while (($#)); do
 done
 
 # Add script in the crontab
-(sudo crontab -l 2>/dev/null; echo "$TIME_INTERVAL $SCRIPT_PATH $SCRIPT_ARGUMENTS") | crontab -
+(sudo crontab -l 2>/dev/null; echo "$TIME_INTERVAL $SCRIPT_PATH $SCRIPT_ARGUMENTS") | sudo crontab -
 echo -e "\033[36mThe script has been added to the crontab\033[0m"
