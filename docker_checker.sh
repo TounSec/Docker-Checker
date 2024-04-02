@@ -80,14 +80,14 @@ vuln_scan() {
 			for IMAGE in $IMAGES; do
 				echo -e "\033[34m[$(date -u +"%Y-%m-%d %H:%M UTC")]\033[0m Quick Vulnerability Scan for \033[33m$IMAGE\033[0m"
 				TIME_START=$(date +%s)
-				grype $IMAGE -o $FORMAT | sudo tee "$OUTPUT/$(date -u +"%Y%m%d-%H:%M")_$IMAGE.$FORMAT"
+				grype $IMAGE -o $FORMAT --scope all-layers | sudo tee "$OUTPUT/$(date -u +"%Y%m%d-%H:%M")_$IMAGE.$FORMAT"
 				echo ""
 			done
 		else
 			for IMAGE in $IMAGES; do	
 				echo -e "\033[34m[$(date -u +"%Y-%m-%d %H:%M UTC")]\033[0m Quick Vulnerability Scan for \033[33m$IMAGE\033[0m"
 				TIME_START=$(date +%s)
-				grype $IMAGE -o $FORMAT
+				grype $IMAGE -o $FORMAT --scope all-layers
 				echo ""
 			done
 		fi
@@ -97,13 +97,13 @@ vuln_scan() {
 		if [ ! -z $OUTPUT ]; then
 			for IMAGE in $IMAGES; do
 				echo -e "\033[34mQuick Vulnerability Scan for \033[33m$IMAGE\033[0m"
-				grype $IMAGE -o $FORMAT | sudo tee "$OUTPUT/$(date -u +"%Y%m%d-%H:%M")_$IMAGE.$FORMAT"
+				grype $IMAGE -o $FORMAT --scope all-layers | sudo tee "$OUTPUT/$(date -u +"%Y%m%d-%H:%M")_$IMAGE.$FORMAT"
 				echo ""
 			done
 		else
 			for IMAGE in $IMAGES; do
 				echo -e "\033[34mQuick Vulnerability Scan for \033[33m$IMAGE\033[0m"
-				grype $IMAGE -o $FORMAT
+				grype $IMAGE -o $FORMAT --scope all-layers
 				echo ""
 			done
 		fi	
