@@ -7,11 +7,11 @@ if [ $# -lt 1 ] || [ $1 == "-h" ] || [ $1 == "--help" ]; then
 	echo "-h, --help															 Print help"
 	echo "-sp,--script-path													Absolut path of the docker_checker.sh script"
 	echo ""
-	echo "[OPTION]"
+	echo "[OPTIONS]"
 	echo "-sa, --script-arguments												The docker_check.sh arguments [Default : -ac]"
 	echo "-ti, --time-interval													Time interval at which the script should be executed [Default : 0 0 * * *]"
 	echo ""
-	echo -e "Usage : \033[36m$0 -sp <SCRIPT_PATH> [OPTION]\033[0m"
+	echo -e "Usage : \033[36m$0 -sp <SCRIPT_PATH> [OPTIONS]\033[0m"
 	exit
 fi
 
@@ -35,7 +35,7 @@ while (($#)); do
 			shift 2
 			;;
 		-sa|--script-arguments)
-			if [ -z $2 ]; then
+			if [ -z "$2" ]; then
 				echo "Script arguments is missing"
 				exit 1
 			fi
@@ -43,7 +43,7 @@ while (($#)); do
 			shift 2
 			;;
 		-ti|--time-interval)
-			if [ -z $2 ]; then
+			if [ -z "$2" ]; then
 				echo "TIme interval is missing"
 				exit 1
 			fi

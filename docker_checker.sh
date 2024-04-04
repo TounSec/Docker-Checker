@@ -5,9 +5,10 @@ if [ $# -lt 1 ] || [ $1 == "-h" ] || [ $1 == "--help" ]; then
 	echo -e "\033[34mAuto Vulnerability Scan for docker images with\033[33m GRYPE\033[0m"
 	echo ""
 	echo "-h, --help						  Print help"
+	echo ""
 	echo "[MODES]"
-	echo "-ai, --all-image				    Scan all installed docker image for vulnerabilities "
-	echo "-ac, --all-container	      			Scan  all containers for image vulnerabilities"
+	echo "-ai, --all-images				    Scan all installed docker images for vulnerabilities "
+	echo "-ac, --all-containers	      			Scan  all containers for image vulnerabilities"
 	echo ""
 	echo "[OPTIONS]"
 	echo "-v, --verbose					      Detail of the output scan execution"
@@ -40,11 +41,11 @@ FORMAT="table"
 while (($#)); do
 	case $1 in
 		-ai|--all-image)
-			MODE="--all-image"
+			MODE="--all-images"
 			shift
 			;;
 		-ac|--all-container)
-			MODE="--all-container"
+			MODE="--all-containers"
 			shift
 			;;
 		-v|--verbose)
@@ -88,7 +89,7 @@ while (($#)); do
 done
 
 
-# Quick scan function for image vulnerabilities with GRYPE
+# Scan function for image vulnerabilities with GRYPE
 vuln_scan() {
 	local IMAGES=$1
 	local VERBOSE=$2
@@ -102,13 +103,13 @@ vuln_scan() {
 			if [ ! -z $CONFIG ]; then
 				for IMAGE in $IMAGES; do
 					echo -e "\033[34m[$(date -u +"%Y-%m-%d %H:%M UTC")]\033[0m Quick Vulnerability Scan for \033[33m$IMAGE\033[0m"
-					grype $IMAGE -c $CONFIG | sudo tee "$OUTPUT/$(date -u +"%Y%m%d-%H:%M")_$IMAGE.$FORMAT"
+					sudo grype $IMAGE -c $CONFIG | sudo tee "$OUTPUT/$(date -u +"%Y%m%d-%H:%M")_$IMAGE.$FORMAT"
 					echo ""
 				done
 			else
 				for IMAGE in $IMAGES; do
 					echo -e "\033[34m[$(date -u +"%Y-%m-%d %H:%M UTC")]\033[0m Quick Vulnerability Scan for \033[33m$IMAGE\033[0m"
-					grype $IMAGE -o $FORMAT --scope all-layers | sudo tee "$OUTPUT/$(date -u +"%Y%m%d-%H:%M")_$IMAGE.$FORMAT"
+					sudo grype $IMAGE -o $FORMAT --scope all-layers | sudo tee "$OUTPUT/$(date -u +"%Y%m%d-%H:%M")_$IMAGE.$FORMAT"
 					echo ""
 				done
 			fi
@@ -116,13 +117,13 @@ vuln_scan() {
 			if [  ! -z $CONFIG  ]; then
 				for IMAGE in $IMAGES; do	
 					echo -e "\033[34m[$(date -u +"%Y-%m-%d %H:%M UTC")]\033[0m Quick Vulnerability Scan for \033[33m$IMAGE\033[0m"
-					grype $IMAGE -c $CONFIG
+					sudo grype $IMAGE -c $CONFIG
 					echo ""
 				done
 			else
 				for IMAGE in $IMAGES; do	
 					echo -e "\033[34m[$(date -u +"%Y-%m-%d %H:%M UTC")]\033[0m Quick Vulnerability Scan for \033[33m$IMAGE\033[0m"
-					grype $IMAGE -o $FORMAT --scope all-layers
+					sudo grype $IMAGE -o $FORMAT --scope all-layers
 					echo ""
 				done		
 			fi
@@ -134,13 +135,13 @@ vuln_scan() {
 			if [ ! -z $CONFIG ]; then
 				for IMAGE in $IMAGES; do
 					echo -e "\033[34mQuick Vulnerability Scan for \033[33m$IMAGE\033[0m"
-					grype $IMAGE -c $CONFIG | sudo tee "$OUTPUT/$(date -u +"%Y%m%d-%H:%M")_$IMAGE.$FORMAT"
+					sudo grype $IMAGE -c $CONFIG | sudo tee "$OUTPUT/$(date -u +"%Y%m%d-%H:%M")_$IMAGE.$FORMAT"
 					echo ""
 				done
 			else
 				for IMAGE in $IMAGES; do
 					echo -e "\033[34mQuick Vulnerability Scan for \033[33m$IMAGE\033[0m"
-					grype $IMAGE -o $FORMAT --scope all-layers | sudo tee "$OUTPUT/$(date -u +"%Y%m%d-%H:%M")_$IMAGE.$FORMAT"
+					sudo grype $IMAGE -o $FORMAT --scope all-layers | sudo tee "$OUTPUT/$(date -u +"%Y%m%d-%H:%M")_$IMAGE.$FORMAT"
 					echo ""
 				done
 			fi
@@ -148,13 +149,13 @@ vuln_scan() {
 			if [ ! -z $CONFIG ]; then
 				for IMAGE in $IMAGES; do
 					echo -e "\033[34mQuick Vulnerability Scan for \033[33m$IMAGE\033[0m"
-					grype $IMAGE -c $CONFIG
+					sudo grype $IMAGE -c $CONFIG
 					echo ""
 				done
 			else
 				for IMAGE in $IMAGES; do
 					echo -e "\033[34mQuick Vulnerability Scan for \033[33m$IMAGE\033[0m"
-					grype $IMAGE -o $FORMAT --scope all-layers
+					sudo grype $IMAGE -o $FORMAT --scope all-layers
 					echo ""
 				done
 			fi
@@ -163,12 +164,12 @@ vuln_scan() {
 }
 
 # Scan for all container image
-if [ $MODE == "--all-container" ]; then
+if [ $MODE == "--all-containers" ]; then
 	IMAGES=$(sudo docker ps -a --format "{{.Image}}")
 	vuln_scan "$IMAGES" "$VERBOSE" "$OUTPUT" "$CONFIG" "$FORMAT"
 
 # Scan for all installed docker image
-elif [ $MODE == "--all-image" ]; then
+elif [ $MODE == "--all-images" ]; then
 	IMAGES=$(sudo docker images --format "{{.Repository}}:{{.Tag}}")
 	vuln_scan "$IMAGES" "$VERBOSE" "$OUTPUT" "$CONFIG" "$FORMAT"
 fi
